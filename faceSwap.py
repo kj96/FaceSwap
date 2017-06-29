@@ -2,20 +2,62 @@
 import sys
 import numpy as np
 import cv2
+import os
+import dlib
+import glob
 
-# Read points from text file
-def readPoints(path) :
+
+PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat" 
+SCALE_FACTOR = 1 
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(PREDICTOR_PATH)
+
+# Exception treatment for pictures with more than one face
+class TooManyFaces(Exception):
+    pass
+
+# Exception treatment for pictures with no faces detected
+class NoFaces(Exception):
+    pass
+
+# Get the landmarks of the detected face
+def get_landmarks(im):
+    rects = detector(im, 1)
+
+    if len(rects) > 1:
+        print("Error: Too many faces detected in the picture.")
+        raise TooManyFaces
+    if len(rects) == 0:
+        print("Error: No face detected in the picture.")
+        raise NoFaces
+
+    return np.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
+
+
+def read_im_and_landmarks(fname):
+    im = cv2.imread(fname, cv2.IMREAD_COLOR)
+    im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
+                         im.shape[0] * SCALE_FACTOR))
+    s = get_landmarks(im)
+    return s
+
+
+# Get coordinates of landmarks from matrix and put into a vector with points
+def readPoints(landmarks) :
     # Create an array of points.
     points = [];
-    
-    # Read points
-    with open(path) as file :
-        for line in file :
-            x, y = line.split()
-            points.append((int(x), int(y)))
+    linhas = len(landmarks)
+    colunas = len(landmarks[0])
+
+    for i in range(linhas):
+        x = landmarks.item((i,0))
+        y = landmarks.item((i,1))
+
+        points.append((int(x), int(y)))
     
 
     return points
+
 
 # Apply affine transform calculated using srcTri and dstTri to src and
 # output an image of size.
@@ -43,7 +85,7 @@ def rectContains(rect, point) :
     return True
 
 
-#calculate delanauy triangle
+# Calculate delanauy triangle
 def calculateDelaunayTriangles(rect, points):
     #create subdiv
     subdiv = cv2.Subdiv2D(rect);
@@ -58,7 +100,7 @@ def calculateDelaunayTriangles(rect, points):
     
     pt = []    
     
-    count= 0    
+    count=0    
     
     for t in triangleList:        
         pt.append((t[0], t[1]))
@@ -80,8 +122,7 @@ def calculateDelaunayTriangles(rect, points):
                 delaunayTri.append((ind[0], ind[1], ind[2]))
         
         pt = []        
-            
-    
+        
     return delaunayTri
         
 
@@ -133,19 +174,16 @@ if __name__ == '__main__' :
         sys.exit(1)
 
     # Read images
-    filename2 = 'donald_trump.jpg'
-    #filename2 = 'donald_trump.jpg'
-    filename1 = 'obama.jpg'
-    #filename1 = 'eduardo.jpg'
-    #filename2 = 'thomas.jpg'
-    
-    img1 = cv2.imread(filename1);
-    img2 = cv2.imread(filename2);
+    landmarks1 = read_im_and_landmarks(sys.argv[1])
+    landmarks2 = read_im_and_landmarks(sys.argv[2])
+
+    img1 = cv2.imread(sys.argv[1]);
+    img2 = cv2.imread(sys.argv[2]);
     img1Warped = np.copy(img2);    
     
     # Read array of corresponding points
-    points1 = readPoints(filename1 + '.txt')
-    points2 = readPoints(filename2 + '.txt')    
+    points1 = readPoints(landmarks1)
+    points2 = readPoints(landmarks2)
     
     # Find convex hull
     hull1 = []
@@ -185,20 +223,20 @@ if __name__ == '__main__' :
     for i in xrange(0, len(hull2)):
         hull8U.append((hull2[i][0], hull2[i][1]))
     
+    # Initialize mask
     mask = np.zeros(img2.shape, dtype = img2.dtype)  
     
+    # Fill mask
     cv2.fillConvexPoly(mask, np.int32(hull8U), (255, 255, 255))
     
     r = cv2.boundingRect(np.float32([hull2]))    
     
     center = ((r[0]+int(r[2]/2), r[1]+int(r[3]/2)))
         
-    
-    # Clone seamlessly.
+    # Clone seamlessly into the other picture.
     output = cv2.seamlessClone(np.uint8(img1Warped), img2, mask, center, cv2.NORMAL_CLONE)
     
     cv2.imshow("Face Swapped", output)
     cv2.waitKey(0)
     
     cv2.destroyAllWindows()
-        
