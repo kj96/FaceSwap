@@ -101,7 +101,6 @@ def calculateDelaunayTriangles(rect, points):
 
     pt = []
 
-    count=0
 
     for t in triangleList:
 
@@ -113,12 +112,12 @@ def calculateDelaunayTriangles(rect, points):
         pt.append(pt2)
         pt.append(pt3)
 
+        # Find index of triangle points in "points" array
         if rectContains(rect, pt1) and rectContains(rect, pt2) and rectContains(rect, pt3):
-            count = count + 1
             ind = []
             for j in xrange(0, 3):
                 for k in xrange(0, len(points)):
-                    if(abs(pt[j][0] - points[k][0]) < 1.0 and abs(pt[j][1] - points[k][1]) < 1.0):
+                    if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
                         ind.append(k)
             if len(ind) == 3:
                 delaunayTri.append((ind[0], ind[1], ind[2]))
@@ -129,11 +128,11 @@ def calculateDelaunayTriangles(rect, points):
 
 
 # Warps and alpha blends triangular regions from img1 and img2 to img
-def warpTriangle(img1, img2, t1, t2) :
+def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
 
     # Find bounding rectangle for each triangle
-    r1 = cv2.boundingRect(np.float32([t1]))
-    r2 = cv2.boundingRect(np.float32([t2]))
+    r1 = cv2.boundingRect(np.float32([triangleImg1]))
+    r2 = cv2.boundingRect(np.float32([triangleImg2]))
 
     # Offset points by left top corner of the respective rectangles
     t1Rect = []
@@ -141,9 +140,9 @@ def warpTriangle(img1, img2, t1, t2) :
     t2RectInt = []
 
     for i in xrange(0, 3):
-        t1Rect.append(((t1[i][0] - r1[0]),(t1[i][1] - r1[1])))
-        t2Rect.append(((t2[i][0] - r2[0]),(t2[i][1] - r2[1])))
-        t2RectInt.append(((t2[i][0] - r2[0]),(t2[i][1] - r2[1])))
+        t1Rect.append(((triangleImg1[i][0] - r1[0]),(triangleImg1[i][1] - r1[1])))
+        t2Rect.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
+        t2RectInt.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
 
 
     # Get mask by filling triangle
@@ -205,6 +204,7 @@ if __name__ == '__main__' :
     # Find Delaunay triangulation for convex hull points
     sizeImg2 = img2.shape
     rect = (0, 0, sizeImg2[1], sizeImg2[0])
+
     delaunayTriangles = calculateDelaunayTriangles(rect, hull2)
     if len(delaunayTriangles) == 0:
         print("It was not possible to find Delaunay triangles.")
@@ -212,19 +212,18 @@ if __name__ == '__main__' :
 
     # Apply affine transformation to Delaunay triangles
     for i in xrange(0, len(delaunayTriangles)):
-        t1 = []
-        t2 = []
+        triangleImg1 = []
+        triangleImg2 = []
 
         #get points for matching triangles in img1 e img2
         for j in xrange(0, 3):
             indexForTrianglePoint = delaunayTriangles[i][j]
             pointForTriangleImg1 = hull1[indexForTrianglePoint]
             pointForTriangleImg2 = hull2[indexForTrianglePoint]
-            t1.append(pointForTriangleImg1)
-            t2.append(pointForTriangleImg2)
+            triangleImg1.append(pointForTriangleImg1)
+            triangleImg2.append(pointForTriangleImg2)
 
-        warpTriangle(img1, mergedImage, t1, t2)
-
+        warpTriangle(img1, img1Warped, triangleImg1, triangleImg2)
 
     # Calculate Mask
     hull8U = []
