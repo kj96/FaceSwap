@@ -112,14 +112,12 @@ def calculateDelaunayTriangles(rect, points):
         pt.append(pt2)
         pt.append(pt3)
 
-        #For each triangle in our list (if is inside our rectangles), we its points with our landmarks
-        #If their distance is less than one, than we put it in our ind vector
-        #At the end, if we have a lenght of 3 it means that we've found our Delaunay triangle
+        #Determina o index do ponto do triangulo no vetor pints
         if rectContains(rect, pt1) and rectContains(rect, pt2) and rectContains(rect, pt3):
             ind = []
             for j in xrange(0, 3):
                 for k in xrange(0, len(points)):
-                    if(abs(pt[j][0] - points[k][0]) < 1.0 and abs(pt[j][1] - points[k][1]) < 1.0):
+                    if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
                         ind.append(k)
             if len(ind) == 3:
                 delaunayTri.append((ind[0], ind[1], ind[2]))
