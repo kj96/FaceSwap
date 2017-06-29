@@ -113,15 +113,14 @@ def calculateDelaunayTriangles(rect, points):
         pt.append(pt3)
 
         # Find index of triangle points in "points" array
-        if rectContains(rect, pt1) and rectContains(rect, pt2) and rectContains(rect, pt3):
-            ind = []
-            for j in xrange(0, 3):
-                for k in xrange(0, len(points)):
-                    if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
-                        ind.append(k)
+        #if rectContains(rect, pt1) and rectContains(rect, pt2) and rectContains(rect, pt3):
+        ind = []
+        for j in xrange(0, 3):
+            for k in xrange(0, len(points)):
+                if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
+                    ind.append(k)
             if len(ind) == 3:
                 delaunayTri.append((ind[0], ind[1], ind[2]))
-
         pt = []
 
     return delaunayTri
@@ -146,7 +145,7 @@ def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
 
 
     # Get mask by filling triangle
-    mask = np.zeros((r2[3], r2[2], 3), delaunayTrianglesype = np.float32)
+    mask = np.zeros((r2[3], r2[2], 3), dtype = np.float32)
     cv2.fillConvexPoly(mask, np.int32(t2RectInt), (1.0, 1.0, 1.0), 16, 0);
 
     # Apply warpImage to small rectangular patches
@@ -190,7 +189,7 @@ if __name__ == '__main__' :
     hull1 = []
     hull2 = []
 
-    # This function find the convex hull of a point set using the Sklansky’s
+    # This function find the convex hull of a point set using the Sklanskys
     # algorithm with O(N logN) complexity. When returnPoints flag = False,
     # returns indices of the convex hull points in the original array (since
     # the set of convex hull points is a subset of the original point set)
@@ -223,7 +222,7 @@ if __name__ == '__main__' :
             triangleImg1.append(pointForTriangleImg1)
             triangleImg2.append(pointForTriangleImg2)
 
-        warpTriangle(img1, img1Warped, triangleImg1, triangleImg2)
+        warpTriangle(img1,mergedImage, triangleImg1, triangleImg2)
 
     # Calculate Mask
     hull8U = []
@@ -231,7 +230,7 @@ if __name__ == '__main__' :
         hull8U.append((hull2[i][0], hull2[i][1]))
 
     # Initialize mask
-    mask = np.zeros(img2.shape, delaunayTrianglesype = img2.delaunayTrianglesype)
+    mask = np.zeros(img2.shape, dtype = img2.dtype)
 
     # Fill mask
     cv2.fillConvexPoly(mask, np.int32(hull8U), (255, 255, 255))
