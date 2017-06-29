@@ -242,6 +242,7 @@ if __name__ == '__main__' :
     output = cv2.seamlessClone(np.uint8(mergedImage), img2, mask, center, cv2.NORMAL_CLONE)
 
     cv2.imshow("Face Swapped", output)
+    cv2.imwrite('output.jpg', output)
     cv2.waitKey(0)
 
     cv2.destroyAllWindows()
