@@ -88,10 +88,10 @@ def rectContains(rect, point) :
 
 # Calculate delanauy triangle
 def calculateDelaunayTriangles(rect, points):
-    #create subdiv
+    # This OpenCV subdiv function creates an empty Delaunay subdivision
+    # where 2D points can be added using the function insert(). The points must
+    # be within the specified rectangle, otherwise a runtime error is raised.
     subdiv = cv2.Subdiv2D(rect);
-
-    # Insert points into subdiv
     for p in points:
         subdiv.insert(p)
 
@@ -147,12 +147,12 @@ def warpTriangle(img1, img2, t1, t2) :
 
 
     # Get mask by filling triangle
-    mask = np.zeros((r2[3], r2[2], 3), dtype = np.float32)
+    mask = np.zeros((r2[3], r2[2], 3), delaunayTrianglesype = np.float32)
     cv2.fillConvexPoly(mask, np.int32(t2RectInt), (1.0, 1.0, 1.0), 16, 0);
 
     # Apply warpImage to small rectangular patches
     img1Rect = img1[r1[1]:r1[1] + r1[3], r1[0]:r1[0] + r1[2]]
-    #img2Rect = np.zeros((r2[3], r2[2]), dtype = img1Rect.dtype)
+    #img2Rect = np.zeros((r2[3], r2[2]), delaunayTrianglesype = img1Rect.delaunayTrianglesype)
 
     size = (r2[2], r2[3])
 
@@ -181,7 +181,7 @@ if __name__ == '__main__' :
 
     img1 = cv2.imread(sys.argv[1]);
     img2 = cv2.imread(sys.argv[2]);
-    img1Warped = np.copy(img2);
+    mergedImage = np.copy(img2);
 
     # Read array of corresponding points
     points1 = readPoints(landmarks1)
@@ -191,33 +191,39 @@ if __name__ == '__main__' :
     hull1 = []
     hull2 = []
 
+    # This function find the convex hull of a point set using the Sklansky’s
+    # algorithm with O(N logN) complexity. When returnPoints flag = False,
+    # returns indices of the convex hull points in the original array (since
+    # the set of convex hull points is a subset of the original point set)
     hullIndex = cv2.convexHull(np.array(points2), returnPoints = False)
 
+    # Add points to hull of each image
     for i in xrange(0, len(hullIndex)):
         hull1.append(points1[int(hullIndex[i])])
         hull2.append(points2[int(hullIndex[i])])
 
-
-    # Find delanauy traingulation for convex hull points
+    # Find Delaunay triangulation for convex hull points
     sizeImg2 = img2.shape
     rect = (0, 0, sizeImg2[1], sizeImg2[0])
-
-    dt = calculateDelaunayTriangles(rect, hull2)
-
-    if len(dt) == 0:
+    delaunayTriangles = calculateDelaunayTriangles(rect, hull2)
+    if len(delaunayTriangles) == 0:
+        print("It was not possible to find Delaunay triangles.")
         quit()
 
     # Apply affine transformation to Delaunay triangles
-    for i in xrange(0, len(dt)):
+    for i in xrange(0, len(delaunayTriangles)):
         t1 = []
         t2 = []
 
-        #get points for img1, img2 corresponding to the triangles
+        #get points for matching triangles in img1 e img2
         for j in xrange(0, 3):
-            t1.append(hull1[dt[i][j]])
-            t2.append(hull2[dt[i][j]])
+            indexForTrianglePoint = delaunayTriangles[i][j]
+            pointForTriangleImg1 = hull1[indexForTrianglePoint]
+            pointForTriangleImg2 = hull2[indexForTrianglePoint]
+            t1.append(pointForTriangleImg1)
+            t2.append(pointForTriangleImg2)
 
-        warpTriangle(img1, img1Warped, t1, t2)
+        warpTriangle(img1, mergedImage, t1, t2)
 
 
     # Calculate Mask
@@ -226,7 +232,7 @@ if __name__ == '__main__' :
         hull8U.append((hull2[i][0], hull2[i][1]))
 
     # Initialize mask
-    mask = np.zeros(img2.shape, dtype = img2.dtype)
+    mask = np.zeros(img2.shape, delaunayTrianglesype = img2.delaunayTrianglesype)
 
     # Fill mask
     cv2.fillConvexPoly(mask, np.int32(hull8U), (255, 255, 255))
@@ -236,7 +242,7 @@ if __name__ == '__main__' :
     center = ((r[0]+int(r[2]/2), r[1]+int(r[3]/2)))
 
     # Clone seamlessly into the other picture.
-    output = cv2.seamlessClone(np.uint8(img1Warped), img2, mask, center, cv2.NORMAL_CLONE)
+    output = cv2.seamlessClone(np.uint8(mergedImage), img2, mask, center, cv2.NORMAL_CLONE)
 
     cv2.imshow("Face Swapped", output)
     cv2.waitKey(0)
