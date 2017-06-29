@@ -128,11 +128,11 @@ def calculateDelaunayTriangles(rect, points):
 
 
 # Warps and alpha blends triangular regions from img1 and img2 to img
-def warpTriangle(img1, img2, t1, t2) :
+def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
 
     # Find bounding rectangle for each triangle
-    r1 = cv2.boundingRect(np.float32([t1]))
-    r2 = cv2.boundingRect(np.float32([t2]))
+    r1 = cv2.boundingRect(np.float32([triangleImg1]))
+    r2 = cv2.boundingRect(np.float32([triangleImg2]))
 
     # Offset points by left top corner of the respective rectangles
     t1Rect = []
@@ -140,9 +140,9 @@ def warpTriangle(img1, img2, t1, t2) :
     t2RectInt = []
 
     for i in xrange(0, 3):
-        t1Rect.append(((t1[i][0] - r1[0]),(t1[i][1] - r1[1])))
-        t2Rect.append(((t2[i][0] - r2[0]),(t2[i][1] - r2[1])))
-        t2RectInt.append(((t2[i][0] - r2[0]),(t2[i][1] - r2[1])))
+        t1Rect.append(((triangleImg1[i][0] - r1[0]),(triangleImg1[i][1] - r1[1])))
+        t2Rect.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
+        t2RectInt.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
 
 
     # Get mask by filling triangle
@@ -201,22 +201,25 @@ if __name__ == '__main__' :
     sizeImg2 = img2.shape
     rect = (0, 0, sizeImg2[1], sizeImg2[0])
 
-    dt = calculateDelaunayTriangles(rect, hull2)
+    delaunayTriangles = calculateDelaunayTriangles(rect, hull2)
 
-    if len(dt) == 0:
+    if len(delaunayTriangles) == 0:
         quit()
 
     # Apply affine transformation to Delaunay triangles
-    for i in xrange(0, len(dt)):
-        t1 = []
-        t2 = []
+    for i in xrange(0, len(delaunayTriangles)):
+        triangleImg1 = []
+        triangleImg2 = []
 
         #get points for img1, img2 corresponding to the triangles
         for j in xrange(0, 3):
-            t1.append(hull1[dt[i][j]])
-            t2.append(hull2[dt[i][j]])
+            indexForTrianglePoint = delaunayTriangles[i][j]
+            pointForTriangleImg1 = hull1[indexForTrianglePoint]
+            pointForTriangleImg2 = hull2[indexForTrianglePoint]
+            triangleImg1.append(pointForTriangleImg1)
+            triangleImg2.append(pointForTriangleImg2)
 
-        warpTriangle(img1, img1Warped, t1, t2)
+        warpTriangle(img1, img1Warped, triangleImg1, triangleImg2)
 
 
     # Calculate Mask
