@@ -113,7 +113,6 @@ def calculateDelaunayTriangles(rect, points):
         pt.append(pt3)
 
         # Find index of triangle points in "points" array
-        #if rectContains(rect, pt1) and rectContains(rect, pt2) and rectContains(rect, pt3):
         ind = []
         for j in xrange(0, 3):
             for k in xrange(0, len(points)):
