@@ -1,7 +1,7 @@
 # FaceSwap
 FaceSwap program written in _Python_, using _Dlib_ and _OpenCV_ libraries.
 While _Dlib_ is used to capture the landmarks over a face, _OpenCV_ is used to manipulate the images data.
-It takes two files as input, where each one must contain only one face, the source face and the destination face, respectly.
+It takes two files as input, where each one must contain only one face, the source face and the destination face, respectively.
 
 
 ### Dependencies
