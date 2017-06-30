@@ -72,20 +72,6 @@ def applyAffineTransform(src, srcTri, dstTri, size) :
     return dst
 
 
-# Check if a point is inside a rectangle
-def rectContains(rect, point) :
-    x_point = point[0]
-    y_point = point[1]
-    x_min = rect[0]
-    y_min = rect[1]
-    x_max = rect[0] + rect[2]
-    y_max = rect[1] + rect[3]
-
-    if x_point > x_min and x_point < x_max and y_point > y_min and y_point < y_max :
-        return True
-    return True
-
-
 # Calculate delanauy triangle
 def calculateDelaunayTriangles(rect, points):
     # This OpenCV subdiv function creates an empty Delaunay subdivision
