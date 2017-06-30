@@ -12,7 +12,9 @@ It takes two files as input, where each one must contain only one face, the sour
 ### Install
 
 Some of Linux distributions already come with Python (2.5+). But if you still don't have it installed, click [here](https://www.python.org/downloads/).
+
 To install OpenCV, follow these steps [here](http://www.pyimagesearch.com/2016/10/24/ubuntu-16-04-how-to-install-opencv/).
+
 Next, to install Dlib, you may follow these steps [here](http://www.pyimagesearch.com/2017/03/27/how-to-install-dlib/).
 
 ### Run
