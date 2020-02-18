@@ -100,8 +100,8 @@ def calculateDelaunayTriangles(rect, points):
 
         # Find index of triangle points in "points" array
         ind = []
-        for j in xrange(0, 3):
-            for k in xrange(0, len(points)):
+        for j in range(0, 3):
+            for k in range(0, len(points)):
                 if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
                     ind.append(k)
             if len(ind) == 3:
@@ -123,7 +123,7 @@ def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
     t2Rect = []
     t2RectInt = []
 
-    for i in xrange(0, 3):
+    for i in range(0, 3):
         t1Rect.append(((triangleImg1[i][0] - r1[0]),(triangleImg1[i][1] - r1[1])))
         t2Rect.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
         t2RectInt.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
@@ -186,7 +186,7 @@ if __name__ == '__main__' :
     hullIndex = cv2.convexHull(np.array(points2), returnPoints = False)
 
     # Add points to hull of each image
-    for i in xrange(0, len(hullIndex)):
+    for i in range(0, len(hullIndex)):
         hull1.append(points1[int(hullIndex[i])])
         hull2.append(points2[int(hullIndex[i])])
 
@@ -200,12 +200,12 @@ if __name__ == '__main__' :
         quit()
 
     # Apply affine transformation to Delaunay triangles
-    for i in xrange(0, len(delaunayTriangles)):
+    for i in range(0, len(delaunayTriangles)):
         triangleImg1 = []
         triangleImg2 = []
 
         #get points for matching triangles in img1 e img2
-        for j in xrange(0, 3):
+        for j in range(0, 3):
             indexForTrianglePoint = delaunayTriangles[i][j]
             pointForTriangleImg1 = hull1[indexForTrianglePoint]
             pointForTriangleImg2 = hull2[indexForTrianglePoint]
@@ -216,7 +216,7 @@ if __name__ == '__main__' :
 
     # Calculate Mask
     hull8U = []
-    for i in xrange(0, len(hull2)):
+    for i in range(0, len(hull2)):
         hull8U.append((hull2[i][0], hull2[i][1]))
 
     # Initialize mask
