@@ -100,8 +100,8 @@ def calculateDelaunayTriangles(rect, points):
 
         # Find index of triangle points in "points" array
         ind = []
-        for j in xrange(0, 3):
-            for k in xrange(0, len(points)):
+        for j in range(0, 3):
+            for k in range(0, len(points)):
                 if(abs(pt[j][0] == points[k][0]) and abs(pt[j][1] == points[k][1]) ):
                     ind.append(k)
             if len(ind) == 3:
@@ -123,7 +123,7 @@ def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
     t2Rect = []
     t2RectInt = []
 
-    for i in xrange(0, 3):
+    for i in range(0, 3):
         t1Rect.append(((triangleImg1[i][0] - r1[0]),(triangleImg1[i][1] - r1[1])))
         t2Rect.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
         t2RectInt.append(((triangleImg2[i][0] - r2[0]),(triangleImg2[i][1] - r2[1])))
@@ -151,6 +151,8 @@ def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
 
 if __name__ == '__main__' :
 
+    print('Start face swapping!')
+
     # Make sure OpenCV is version 3.0 or above
     (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
@@ -158,12 +160,15 @@ if __name__ == '__main__' :
         print >>sys.stderr, 'ERROR: Script needs OpenCV 3.0 or higher'
         sys.exit(1)
 
-    # Read images
-    landmarks1 = read_im_and_landmarks(sys.argv[1])
-    landmarks2 = read_im_and_landmarks(sys.argv[2])
+    filepath1 = sys.argv[1]
+    filepath2 = sys.argv[2]
 
-    img1 = cv2.imread(sys.argv[1]);
-    img2 = cv2.imread(sys.argv[2]);
+    # Read images
+    landmarks1 = read_im_and_landmarks(filepath1)
+    landmarks2 = read_im_and_landmarks(filepath2)
+
+    img1 = cv2.imread(filepath1);
+    img2 = cv2.imread(filepath2);
     mergedImage = np.copy(img2);
 
     # Read array of corresponding points
@@ -181,7 +186,7 @@ if __name__ == '__main__' :
     hullIndex = cv2.convexHull(np.array(points2), returnPoints = False)
 
     # Add points to hull of each image
-    for i in xrange(0, len(hullIndex)):
+    for i in range(0, len(hullIndex)):
         hull1.append(points1[int(hullIndex[i])])
         hull2.append(points2[int(hullIndex[i])])
 
@@ -195,12 +200,12 @@ if __name__ == '__main__' :
         quit()
 
     # Apply affine transformation to Delaunay triangles
-    for i in xrange(0, len(delaunayTriangles)):
+    for i in range(0, len(delaunayTriangles)):
         triangleImg1 = []
         triangleImg2 = []
 
         #get points for matching triangles in img1 e img2
-        for j in xrange(0, 3):
+        for j in range(0, 3):
             indexForTrianglePoint = delaunayTriangles[i][j]
             pointForTriangleImg1 = hull1[indexForTrianglePoint]
             pointForTriangleImg2 = hull2[indexForTrianglePoint]
@@ -211,7 +216,7 @@ if __name__ == '__main__' :
 
     # Calculate Mask
     hull8U = []
-    for i in xrange(0, len(hull2)):
+    for i in range(0, len(hull2)):
         hull8U.append((hull2[i][0], hull2[i][1]))
 
     # Initialize mask
@@ -227,8 +232,13 @@ if __name__ == '__main__' :
     # Clone seamlessly into the other picture.
     output = cv2.seamlessClone(np.uint8(mergedImage), img2, mask, center, cv2.NORMAL_CLONE)
 
-    cv2.imshow("Face Swapped", output)
-    cv2.imwrite('output.jpg', output)
-    cv2.waitKey(0)
+    print('Faceswap finished! Enjoy the masterpiece :)')
 
+    filename = './images/result.jpg'
+
+    cv2.imwrite(filename, img1)
+
+#    cv2.imshow("Face Swapped", output)
+    cv2.imwrite('./images/output.jpg', output)
+    cv2.waitKey(0)
     cv2.destroyAllWindows()

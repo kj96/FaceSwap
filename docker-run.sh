@@ -1,0 +1,1 @@
+docker run -it --rm faceswap python faceSwap.py $1 $2
