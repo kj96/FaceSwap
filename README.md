@@ -4,7 +4,6 @@ While _Dlib_ is used to capture the landmarks over a face, _OpenCV_ is used to m
 It takes two files as input, where each one must contain only one face, the source face and the destination face, respectively.
 
 ## Local Setup
----
 ### Dependencies
 - Python 3.0+
 - OpenCV3
@@ -31,17 +30,16 @@ $ python faceSwap.py <image1> <image2>
 Where **image1** is the name of the file containing the source face, and **image2** is the name of the file containing the destination face. 
 
 ## Docker Setup 
----
-
 At first, you'll have to build the docker image by running the script `docker-build.sh`:
 ``` sh
 $ ./docker-build.sh
 ```
 
-**Note:** The first might take a long time, be prepared!
+**Note:** It may take a long time to build the image in the first time, be patient!
 
 Once the image is built, you may run it with the help of the script  `docker-run.sh` :
 ``` sh
-$ ./docker-run.sh <image1> <image2>
+$ ./docker-run.sh ../images/<image1> ../images/<image2>
 ```
 
+**Note:** Make sure that the both images are in the __images__ directory
