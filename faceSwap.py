@@ -7,7 +7,7 @@ import dlib
 import glob
 import urllib.request as ur
 from flask import Flask, send_file
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 
 app = Flask(__name__)
 api = Api(app)
@@ -243,7 +243,11 @@ def faceswap(sourceUrl, targetUrl) :
 
 class Server(Resource):
     def get(self):
-        faceswap('source URL', 'target URL')
+        parser = reqparse.RequestParser()
+        parser.add_argument('source', location='args')
+        parser.add_argument('target', location='args')
+        args = parser.parse_args()
+        faceswap(args['source'], args['target'])
         return send_file('output.jpg')
 
 api.add_resource(Server, '/')
