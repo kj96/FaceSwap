@@ -5,7 +5,12 @@ import cv2
 import os
 import dlib
 import glob
+import urllib.request as ur
+from flask import Flask, send_file
+from flask_restful import Resource, Api, reqparse
 
+app = Flask(__name__)
+api = Api(app)
 
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
 SCALE_FACTOR = 1
@@ -34,8 +39,7 @@ def get_landmarks(im):
     return np.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
 
 
-def read_im_and_landmarks(fname):
-    im = cv2.imread(fname, cv2.IMREAD_COLOR)
+def read_im_and_landmarks(im):
     im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
                          im.shape[0] * SCALE_FACTOR))
     s = get_landmarks(im)
@@ -148,9 +152,12 @@ def warpTriangle(img1, img2, triangleImg1, triangleImg2) :
 
     img2[r2[1]:r2[1]+r2[3], r2[0]:r2[0]+r2[2]] = img2[r2[1]:r2[1]+r2[3], r2[0]:r2[0]+r2[2]] + img2Rect
 
+def load_image_from_url(url):
+    resp = ur.urlopen(url)
+    arr = np.asarray(bytearray(resp.read()), dtype="uint8")
+    return cv2.imdecode(arr, cv2.IMREAD_COLOR)
 
-if __name__ == '__main__' :
-
+def faceswap(sourceUrl, targetUrl) :
     print('Start face swapping!')
 
     # Make sure OpenCV is version 3.0 or above
@@ -160,15 +167,13 @@ if __name__ == '__main__' :
         print >>sys.stderr, 'ERROR: Script needs OpenCV 3.0 or higher'
         sys.exit(1)
 
-    filepath1 = sys.argv[1]
-    filepath2 = sys.argv[2]
+    img1 = load_image_from_url(sourceUrl)
+    img2 = load_image_from_url(targetUrl)
 
     # Read images
-    landmarks1 = read_im_and_landmarks(filepath1)
-    landmarks2 = read_im_and_landmarks(filepath2)
+    landmarks1 = read_im_and_landmarks(img1)
+    landmarks2 = read_im_and_landmarks(img2)
 
-    img1 = cv2.imread(filepath1);
-    img2 = cv2.imread(filepath2);
     mergedImage = np.copy(img2);
 
     # Read array of corresponding points
@@ -234,11 +239,18 @@ if __name__ == '__main__' :
 
     print('Faceswap finished! Enjoy the masterpiece :)')
 
-    filename = './images/result.jpg'
+    cv2.imwrite('./output.jpg', output)
 
-    cv2.imwrite(filename, img1)
+class Server(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('source', location='args')
+        parser.add_argument('target', location='args')
+        args = parser.parse_args()
+        faceswap(args['source'], args['target'])
+        return send_file('output.jpg')
 
-#    cv2.imshow("Face Swapped", output)
-    cv2.imwrite('./images/output.jpg', output)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+api.add_resource(Server, '/')
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
