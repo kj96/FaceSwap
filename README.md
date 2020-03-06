@@ -50,4 +50,4 @@ Once the application is up and running, you may send requests to faceswap images
 $ curl --location --request GET 'http://127.0.0.1:5000?source=<img1>&target=<img2>' > output.jpeg
 ```
 
-Where **<img1>** is the URL of the source image, **<img2>** is the URL of the target image and **output** is the name of the resulting file
+Where **img1** is the URL of the source image, **img2** is the URL of the target image and **output** is the name of the resulting file
