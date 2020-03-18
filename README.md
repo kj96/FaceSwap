@@ -3,7 +3,7 @@ FaceSwap program written in _Python_, using _Dlib_ and _OpenCV_ libraries.
 While _Dlib_ is used to capture the landmarks over a face, _OpenCV_ is used to manipulate the images data.
 It takes two files as input, where each one must contain only one face, the source face and the destination face, respectively.
 
-## Local Setup
+## Local Setup (Outdated)
 ### Dependencies
 - Python 3.0+
 - OpenCV3
@@ -29,17 +29,25 @@ $ python faceSwap.py <image1> <image2>
 
 Where **image1** is the name of the file containing the source face, and **image2** is the name of the file containing the destination face. 
 
-## Docker Setup 
+## Docker Setup (Recommended)
 At first, you'll have to build the docker image by running the script `docker-build.sh`:
 ``` sh
 $ ./docker-build.sh
 ```
 
-**Note:** It may take a long time to build the image in the first time, be patient!
+**Note:** It may take a long time to build the image at the first time, be patient!
 
 Once the image is built, you may run it with the help of the script  `docker-run.sh` :
 ``` sh
-$ ./docker-run.sh ../images/<image1> ../images/<image2>
+$ ./docker-run.sh
 ```
 
-**Note:** Make sure that the both images are in the __images__ directory
+The application will be running at the port 5000.
+
+Once the application is up and running, you may send requests to faceswap images:
+
+``` sh
+$ curl --location --request GET 'http://127.0.0.1:5000?source=<img1>&target=<img2>' > output.jpeg
+```
+
+Where **img1** is the URL of the source image, **img2** is the URL of the target image and **output** is the name of the resulting file
